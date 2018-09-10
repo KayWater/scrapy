@@ -6,6 +6,7 @@
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 import pymysql
 from testScrapy import settings
+from testScrapy.items import AuthorItem, TagItem
 
 class TestscrapyPipeline(object):
     def process_item(self, item, spider):
@@ -37,13 +38,11 @@ class AuthorPipeline(object):
         self.cursor = self.connection.cursor()
         
     def process_item(self, item, spider):
-
-        sql = "insert into author (name, birthdate, birthplace, description) values (%(name)s, %(birthdate)s, %(birthplace)s, %(description)s)"
-        self.cursor.execute(sql, dict(item))
-        self.connection.commit()
-        return item
-    
-    
+        if isinstance(item, AuthorItem): 
+            sql = "insert into author (name, birthdate, birthplace, description) values (%(name)s, %(birthdate)s, %(birthplace)s, %(description)s)"
+            self.cursor.execute(sql, dict(item))
+            self.connection.commit()
+        return item       
     
 class TagPipeline(object):
     
@@ -56,12 +55,12 @@ class TagPipeline(object):
         
         self.cursor = self.connection.cursor()
         
-    def process_item(self, item, spider):
-        
-        sql = "insert into tag (name) values (%(name)s)"
-        result = self.cursor.excute(sql, dict(item))
-        print(result)
-        pass
+    def process_item(self, item, spider): 
+        if isinstance(item, TagItem):
+            sql = "insert into tag (name) values (%(name)s)"
+            result = self.cursor.execute(sql, dict(item))
+            self.connection.commit()
+        return item
     
     
     

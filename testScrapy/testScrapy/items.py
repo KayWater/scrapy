@@ -20,7 +20,6 @@ class QuoteItem(scrapy.Item):
     tags = scrapy.Field()
 
 class TagItem(scrapy.Item):
-    id = scrapy.Field()
     name = scrapy.Field()
     
 class AuthorItem(scrapy.Item):

@@ -30,6 +30,7 @@ class QuotesSpider(scrapy.Spider):
             for tag in tags:
                 tag_item['name'] = tag
                 yield tag_item
+                pass
             
             author_link = quote.css("small.author + a::attr(href)")
 
