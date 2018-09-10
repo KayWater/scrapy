@@ -57,9 +57,17 @@ class TagPipeline(object):
         
     def process_item(self, item, spider): 
         if isinstance(item, TagItem):
-            sql = "insert into tag (name) values (%(name)s)"
-            result = self.cursor.execute(sql, dict(item))
+            sql = "select id from tag where name = %(name)s limit 1"
+            self.cursor.execute(sql, dict(item))
             self.connection.commit()
+            res = self.cursor.fetchone()
+            if res:
+                item['id'] = res[0]
+            else:
+                sql = "insert into tag (name) values (%(name)s)"
+                self.cursor.execute(sql, dict(item))
+                self.connection.commit()
+                item['id'] = self.cursor.lastrowid
         return item
     
     

@@ -15,14 +15,17 @@ class TestscrapyItem(scrapy.Item):
 
 
 class QuoteItem(scrapy.Item):
+    id = scrapy.Field()
     text = scrapy.Field()
     author = scrapy.Field()
     tags = scrapy.Field()
 
 class TagItem(scrapy.Item):
+    id = scrapy.Field()
     name = scrapy.Field()
     
 class AuthorItem(scrapy.Item):
+    id = scrapy.Field()
     name = scrapy.Field()
     birthdate = scrapy.Field()
     birthplace = scrapy.Field()

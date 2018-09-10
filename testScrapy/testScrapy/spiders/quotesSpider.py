@@ -23,17 +23,24 @@ class QuotesSpider(scrapy.Spider):
         
         # extract quote text, author and tags
         for quote in response.css("div.quote"):
-            tag_item = TagItem()
             tags = quote.css("div.tags a.tag::text").extract()
             text = quote.css("span.text::text").extract_first()
             author = quote.css("small.author::text").extract_first()
+            tag_id = []
             for tag in tags:
+                tag_item = TagItem()
                 tag_item['name'] = tag
                 yield tag_item
-                pass
+                tag_id.append(tag_item['id'])             
             
-            author_link = quote.css("small.author + a::attr(href)")
-
+            # follow links to auhtor page
+            author_item = AuthorItem()
+            author_link = quote.css("small.author + a::attr(href)")[0]
+            request = response.follow(author_link, self.author_parse)
+            request.meta['author_item'] = author_item
+            yield request
+             
+            author_item = response.meta['author_item']
             pass
         
         
@@ -54,7 +61,7 @@ class QuotesSpider(scrapy.Spider):
 #             yield scrapy.Request(next_page, callback=self.parse)
             
     def author_parse(self, response):
-        author_item = AuthorItem()
+        author_item = response.meta['author_item']
         
         author_item['name'] = response.css("h3.author-title::text").extract_first()
         author_item['birthdate'] = response.css("span.author-born-date::text").extract_first()
