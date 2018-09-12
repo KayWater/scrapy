@@ -5,10 +5,11 @@ Created on 2018年9月5日
 '''
 import scrapy
 from testScrapy.items import AuthorItem, QuoteItem, TagItem
+from OpenSSL._util import text
 
 class QuotesSpider(scrapy.Spider):
     name = "quotes"
-
+    
     def start_requests(self):
         urls = [
             'http://quotes.toscrape.com',
@@ -31,17 +32,18 @@ class QuotesSpider(scrapy.Spider):
                 tag_item = TagItem()
                 tag_item['name'] = tag
                 yield tag_item
-                tag_id.append(tag_item['id'])             
+                tag_id.append(tag_item['id'])
             
             # follow links to auhtor page
-            author_item = AuthorItem()
             author_link = quote.css("small.author + a::attr(href)")[0]
-            request = response.follow(author_link, self.author_parse)
-            request.meta['author_item'] = author_item
-            yield request
-             
-            author_item = response.meta['author_item']
-            pass
+            yield response.follow(author_link, self.author_parse)
+            
+            quote_item = QuoteItem()
+            quote_item['text'] = repr(text)
+            quote_item['author'] = author
+            quote_item['tags'] = repr('-'.join(map(str, tag_id)))
+            yield quote_item
+            
         
         
         # follow pagination links
@@ -61,12 +63,12 @@ class QuotesSpider(scrapy.Spider):
 #             yield scrapy.Request(next_page, callback=self.parse)
             
     def author_parse(self, response):
-        author_item = response.meta['author_item']
+        author_item = AuthorItem()
         
         author_item['name'] = response.css("h3.author-title::text").extract_first()
         author_item['birthdate'] = response.css("span.author-born-date::text").extract_first()
         author_item['birthplace'] = response.css("span.author-born-location::text").extract_first()
         author_item['description'] = response.css("div.author-description::text").extract_first()
-       
+        
         yield author_item
         

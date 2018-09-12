@@ -6,7 +6,7 @@
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 import pymysql
 from testScrapy import settings
-from testScrapy.items import AuthorItem, TagItem
+from testScrapy.items import AuthorItem, TagItem, QuoteItem
 
 class TestscrapyPipeline(object):
     def process_item(self, item, spider):
@@ -16,15 +16,19 @@ class QuotePipeline(object):
     
     def __init__(self):
         self.connection = pymysql.connect(
-            host = self.settings.MYSQL_HOST,
-            user = self.settings.MYSQL_USER,
-            password = self.settings.MYSQL_PASSWORD,
-            database = self.settings.MYSQL_DB)
+            host = settings.MYSQL_HOST,
+            user = settings.MYSQL_USER,
+            password = settings.MYSQL_PASSWORD,
+            database = settings.MYSQL_DB)
         
         self.cursor = self.connection.cursor()
     
     def process_item(self, item, spider):
-        pass
+        if isinstance(item, QuoteItem):
+            sql = "insert into quote (text, author, tags) values (%(text)s, %(author)s, %(tags)s)"
+            self.cursor.execute(sql, dict(item))
+            self.connection.commit()
+        return item
     
 class AuthorPipeline(object):
     
