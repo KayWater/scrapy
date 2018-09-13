@@ -5,8 +5,10 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 import pymysql
+from scrapy.exporters import JsonLinesItemExporter 
 from testScrapy import settings
-from testScrapy.items import AuthorItem, TagItem, QuoteItem
+from testScrapy.items import AuthorItem, TagItem, QuoteItem, IpsItem
+from testScrapy.spiders import proxySpider
 
 class TestscrapyPipeline(object):
     def process_item(self, item, spider):
@@ -74,5 +76,18 @@ class TagPipeline(object):
                 item['id'] = self.cursor.lastrowid
         return item
     
+class IpJsonPipeline(object):
     
+    def close_spider(self, spider):
+        pass
+     
+    def process_item(self, item, spider):
+        if isinstance(item, IpsItem) and isinstance(spider, proxySpider):
+            with open("proxy.json", 'w') as f:
+                exporter = JsonLinesItemExporter(f)
+                exporter.start_exporting()
+                exporter.export_item(item)
+                exporter.finish_exporting()
+                exporter.file.close()
+        return item
     

@@ -31,3 +31,16 @@ class AuthorItem(scrapy.Item):
     birthplace = scrapy.Field()
     description = scrapy.Field()
         
+class MovieItem(scrapy.Item):
+    
+    title = scrapy.Field()
+    directors = scrapy.Field()
+    screenwriters = scrapy.Field()
+    actors = scrapy.Field()
+    year = scrapy.Field()
+    genre = scrapy.Field()
+    region = scrapy.Field()
+    summary = scrapy.Field()
+
+class IpsItem(scrapy.Item):
+    ip_list = scrapy.Field()
