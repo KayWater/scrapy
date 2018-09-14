@@ -13,10 +13,11 @@ class ProxySpider(scrapy.Spider):
         'ROBOTSTXT_OBEY': False,
         'DOWNLOAD_DELAY': 5,
         'USER_AGENT': "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.81 Safari/537.36",
+        'ITEM_PIPELINES': {'testScrapy.pipelines.IpJsonPipeline': 300,}   
         }
     
     def start_requests(self):
-        start_urls = ["http://www.xicidaili.com/nn/"]
+        start_urls = ["https://www.kuaidaili.com/free/inha/2461/"]
         
         for url in start_urls:
             yield scrapy.Request(url=url, callback=self.parse)
@@ -24,6 +25,8 @@ class ProxySpider(scrapy.Spider):
     def parse(self, response):
         
         ips = IpsItem()
-        ip_list = response.xpath("//table[@id='ip_list']//tr/td[2]/text()").extract()
+        ip_addr = response.xpath("//div[@id='list']//td[@data-title='IP']/text()").extract()
+        ip_port = response.xpath("//div[@id='list']//td[@data-title='PORT']/text()").extract()
+        ip_list = [x+":"+y for x, y in zip(ip_addr, ip_port)]
         ips['ip_list'] = ip_list
         yield ips

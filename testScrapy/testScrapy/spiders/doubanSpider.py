@@ -5,7 +5,10 @@ Created on 2018年9月12日
 '''
 
 import scrapy
+import json
+import random
 from testScrapy.items import MovieItem
+
 
 class DoubanSpider(scrapy.Spider):
     name = 'douban'
@@ -15,14 +18,19 @@ class DoubanSpider(scrapy.Spider):
         'DOWNLOAD_DELAY': 5,
         'USER_AGENT': "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.81 Safari/537.36",
         'FEED_URI': 'file:///D:/123.json',
-        'FEED_FORMAT': 'jsonlines'
-        }
+        'FEED_FORMAT': 'jsonlines',
+        'COOKIES_ENABLED': False,
+        'IMAGES_STORE': '../images/',
+        'DOWNLOAD_MIDDLEWARE': {
+            'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 100}
+    }
     
     def start_requests(self):
         urls = ["https://movie.douban.com/top250"]
-        
+        ip_list = self.get_ip()
         for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
+            ip = random.choice(ip_list)
+            yield scrapy.Request(url=url, meta={"proxy": "http://%s"%ip}, callback=self.parse)
             
     def parse(self, response):
         
@@ -62,4 +70,9 @@ class DoubanSpider(scrapy.Spider):
         movie_item['region'] = region
         yield movie_item
         
-       
+    def get_ip(self):
+        with open("../proxy.json", 'rb') as f:
+            text = f.readline()
+            data = json.loads(text)
+            return data['ip_list']
+        

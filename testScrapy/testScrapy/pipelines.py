@@ -77,17 +77,22 @@ class TagPipeline(object):
         return item
     
 class IpJsonPipeline(object):
+    # export json file for scraped ip list
     
+    # instance a file object and an JsonLinesItemExporter object 
+    def open_spider(self, spider):
+        file = open("../proxy.json", 'wb')
+        self.exporter = JsonLinesItemExporter(file)
+        self.exporter.start_exporting()
+    
+    # close file object and finish exporting
     def close_spider(self, spider):
-        pass
-     
+        self.exporter.finish_exporting()
+        self.exporter.file.close()
+    
+    # exporting item 
     def process_item(self, item, spider):
-        if isinstance(item, IpsItem) and isinstance(spider, proxySpider):
-            with open("proxy.json", 'w') as f:
-                exporter = JsonLinesItemExporter(f)
-                exporter.start_exporting()
-                exporter.export_item(item)
-                exporter.finish_exporting()
-                exporter.file.close()
+        if isinstance(item, IpsItem) and isinstance(spider, proxySpider.ProxySpider):
+            self.exporter.export_item(item)
         return item
     
