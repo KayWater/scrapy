@@ -55,8 +55,8 @@ class ZhihuSpider(scrapy.Spider):
 
         post_data = {
             "client_id": clientId,
-            "username": "15208393732",  # 输入知乎用户名
-            "password": "R393732k",  # 输入知乎密码
+            "username": "",  # 输入知乎用户名
+            "password": "",  # 输入知乎密码
             "grant_type": grantType,
             "source": source,
             "timestamp": timestamp,
