@@ -7,6 +7,7 @@ Created on 2018年9月14日
 import scrapy
 import json
 import random
+import os
 
 class TestProxySpider(scrapy.Spider):
     name = 'testProxy'
@@ -20,19 +21,21 @@ class TestProxySpider(scrapy.Spider):
     }
     
     def start_requests(self):
-        urls = ["http://ip.chinaz.com/linksip"]
-        ip_list = self.get_ip()
-        for url in urls:
-            ip = random.choice(ip_list)
-            print(ip)
-            yield scrapy.Request(url=url, meta={"proxy": "http://%s"%(ip)}, callback=self.parse)
+        urls = ["http://ip.chinaz.com/getip.aspx"]
+        
+        with open("../proxy.json") as f:
+            for line in f.readlines():
+                ip_list = json.loads(line)
+                for ip in ip_list["ip_list"]:
+                    yield scrapy.Request(url=urls[0], callback=self.parse, meta={"proxy": "http://%s"%ip, "ip":ip}, errback=self.err_parse, dont_filter=True)
             
     def parse(self, response):
+        proxy = response.meta["ip"]
+        with open("../validProxy.json", "a") as f:
+            f.write(proxy+"\n")
+            pass
         
-        ip = response.css("dd.fz24::text").extract()
+    def err_parse(self, failure):
+        print(failure.value)
         
-    def get_ip(self):
-        with open("../proxy.json", 'rb') as f:
-            text = f.readline()
-            data = json.loads(text)
-            return data['ip_list']   
+    

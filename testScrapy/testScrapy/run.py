@@ -7,13 +7,14 @@ import scrapy
 from twisted.internet import reactor
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.log import configure_logging
-from testScrapy.spiders import proxySpider, doubanSpider, testProxySpider
+from testScrapy.spiders import proxySpider, doubanSpider, testProxySpider, zhihuSpider
 
 configure_logging({'LOG_FORMAT': '%(levelname)s: %(message)s'})
 runner = CrawlerRunner()
 #d = runner.crawl(proxySpider.ProxySpider)
 #d = runner.crawl(doubanSpider.DoubanSpider)
-d = runner.crawl(testProxySpider.TestProxySpider)
+#d = runner.crawl(testProxySpider.TestProxySpider)
+d = runner.crawl(zhihuSpider.ZhihuSpider)
 #runner.join()
 d.addBoth(lambda _: reactor.stop())
 reactor.run() # the script will block here until the crawling is finished

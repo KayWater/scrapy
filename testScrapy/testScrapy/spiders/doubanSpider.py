@@ -27,9 +27,9 @@ class DoubanSpider(scrapy.Spider):
     
     def start_requests(self):
         urls = ["https://movie.douban.com/top250"]
-        ip_list = self.get_ip()
+        ip = self.get_ip()
         for url in urls:
-            ip = random.choice(ip_list)
+            
             yield scrapy.Request(url=url, meta={"proxy": "http://%s"%ip}, callback=self.parse)
             
     def parse(self, response):
@@ -71,8 +71,7 @@ class DoubanSpider(scrapy.Spider):
         yield movie_item
         
     def get_ip(self):
-        with open("../proxy.json", 'rb') as f:
+        with open("../validProxy.json", 'r') as f:
             text = f.readline()
-            data = json.loads(text)
-            return data['ip_list']
+            return text
         
