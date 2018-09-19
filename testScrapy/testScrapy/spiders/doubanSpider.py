@@ -5,12 +5,13 @@ Created on 2018年9月12日
 '''
 
 import scrapy
+from scrapy.spiders import CrawlSpider, Rule
 import json
 import random
 from testScrapy.items import MovieItem
+from scrapy.linkextractors import  LinkExtractor
 
-
-class DoubanSpider(scrapy.Spider):
+class DoubanSpider(CrawlSpider):
     name = 'douban'
     
     custom_settings = {
@@ -20,29 +21,22 @@ class DoubanSpider(scrapy.Spider):
         'FEED_URI': 'file:///D:/123.json',
         'FEED_FORMAT': 'jsonlines',
         'COOKIES_ENABLED': False,
-        'IMAGES_STORE': '../images/',
-        'DOWNLOAD_MIDDLEWARE': {
-            'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 100}
+#        'IMAGES_STORE': '../images/',
+ 
     }
+    allowed_domains = ['douban.com']
+    start_urls = ['http://movie.douban.com']
     
-    def start_requests(self):
-        urls = ["https://movie.douban.com/top250"]
-        ip = self.get_ip()
-        for url in urls:
-            
-            yield scrapy.Request(url=url, meta={"proxy": "http://%s"%ip}, callback=self.parse)
-            
-    def parse(self, response):
-        
-        for link in response.css("div.info a::attr(href)"):
-            yield response.follow(link, self.parse_movie)
-        
-        for link in response.css("div.paginator > a::attr(href)"):
-            yield response.follow(link, self.parse)
+    rules = (
+        # Extract links matching 'category.php' (but not matching 'subsection.php')
+        # and follow links from them (since no callback means follow=True by default).
+        Rule(LinkExtractor(allow=(r'/subject/\d+/', )), callback='parse_movie', process_links='strip_query_string' ),
+
+        # Extract links matching 'item.php' and parse them with the spider's method parse_item
+        Rule(LinkExtractor(allow=(r'/celebrity/\d+/', )), callback='parse_celebrity'),
+    )
             
     def parse_movie(self, response):
-        
-        url = response.url 
         
         movie_item = MovieItem()
        
@@ -70,8 +64,10 @@ class DoubanSpider(scrapy.Spider):
         movie_item['region'] = region
         yield movie_item
         
-    def get_ip(self):
-        with open("../validProxy.json", 'r') as f:
-            text = f.readline()
-            return text
-        
+    def parse_celebrity(self, response):
+        response
+        pass
+    
+    def strip_query_string(self, request): 
+        request
+        pass 

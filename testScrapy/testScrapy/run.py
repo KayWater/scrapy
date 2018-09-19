@@ -12,9 +12,9 @@ from testScrapy.spiders import proxySpider, doubanSpider, testProxySpider, zhihu
 configure_logging({'LOG_FORMAT': '%(levelname)s: %(message)s'})
 runner = CrawlerRunner()
 #d = runner.crawl(proxySpider.ProxySpider)
-#d = runner.crawl(doubanSpider.DoubanSpider)
+d = runner.crawl(doubanSpider.DoubanSpider)
 #d = runner.crawl(testProxySpider.TestProxySpider)
-d = runner.crawl(zhihuSpider.ZhihuSpider)
+#d = runner.crawl(zhihuSpider.ZhihuSpider)
 #runner.join()
 d.addBoth(lambda _: reactor.stop())
 reactor.run() # the script will block here until the crawling is finished
