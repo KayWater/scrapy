@@ -19,10 +19,6 @@ class QuoteItem(scrapy.Item):
     text = scrapy.Field()
     author = scrapy.Field()
     tags = scrapy.Field()
-
-class TagItem(scrapy.Item):
-    id = scrapy.Field()
-    name = scrapy.Field()
     
 class AuthorItem(scrapy.Item):
     id = scrapy.Field()
@@ -41,6 +37,16 @@ class MovieItem(scrapy.Item):
     genre = scrapy.Field()
     region = scrapy.Field()
     summary = scrapy.Field()
+    runtime = scrapy.Field()
+
+class CelebrityItem(scrapy.Item):
+    
+    name = scrapy.Field()
+    gender = scrapy.Field()
+    constellation = scrapy.Field()
+    birthdate = scrapy.Field()
+    birthplace = scrapy.Field()
+    jobs = scrapy.Field()
 
 class IpsItem(scrapy.Item):
     ip_list = scrapy.Field()

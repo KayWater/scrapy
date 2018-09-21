@@ -7,8 +7,8 @@
 import pymysql
 from scrapy.exporters import JsonLinesItemExporter 
 from testScrapy import settings
-from testScrapy.items import AuthorItem, TagItem, QuoteItem, IpsItem
-from testScrapy.spiders import proxySpider
+from testScrapy.items import AuthorItem, QuoteItem, IpsItem, MovieItem
+from testScrapy.spiders import proxySpider, doubanSpider
 
 class TestscrapyPipeline(object):
     def process_item(self, item, spider):
@@ -48,32 +48,6 @@ class AuthorPipeline(object):
             sql = "insert into author (name, birthdate, birthplace, description) values (%(name)s, %(birthdate)s, %(birthplace)s, %(description)s)"
             self.cursor.execute(sql, dict(item))
             self.connection.commit()
-        return item       
-    
-class TagPipeline(object):
-    
-    def __init__(self):
-        self.connection = pymysql.connect(
-            host = settings.MYSQL_HOST,
-            user = settings.MYSQL_USER,
-            password = settings.MYSQL_PASSWORD,
-            database = settings.MYSQL_DB)
-        
-        self.cursor = self.connection.cursor()
-        
-    def process_item(self, item, spider): 
-        if isinstance(item, TagItem):
-            sql = "select id from tag where name = %(name)s limit 1"
-            self.cursor.execute(sql, dict(item))
-            self.connection.commit()
-            res = self.cursor.fetchone()
-            if res:
-                item['id'] = res[0]
-            else:
-                sql = "insert into tag (name) values (%(name)s)"
-                self.cursor.execute(sql, dict(item))
-                self.connection.commit()
-                item['id'] = self.cursor.lastrowid
         return item
     
 class IpJsonPipeline(object):
@@ -81,7 +55,7 @@ class IpJsonPipeline(object):
     
     # instance a file object and an JsonLinesItemExporter object 
     def open_spider(self, spider):
-        file = open("../proxy.json", 'wb')
+        file = open("../proxy.json", 'wb', encoding='utf-8')
         self.exporter = JsonLinesItemExporter(file)
         self.exporter.start_exporting()
     
@@ -96,3 +70,20 @@ class IpJsonPipeline(object):
             self.exporter.export_item(item)
         return item
     
+class MovieJsonPipeline(object):
+    
+    def open_spider(self, spider):
+        if isinstance(spider, doubanSpider.DoubanSpider):
+            file = open("../movies.json", 'wb')
+            self.exporter = JsonLinesItemExporter(file, ensure_ascii=False)
+            self.exporter.start_exporting()
+    
+    def close_spider(self, spider):
+        self.exporter.finish_exporting()
+        self.exporter.file.close()
+        
+    def process_item(self, item, spider):
+        if isinstance(item, MovieItem) and isinstance(spider, doubanSpider.DoubanSpider):
+            self.exporter.export_item(item)
+        return item   
+      

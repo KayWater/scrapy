@@ -4,19 +4,26 @@ Created on 2018年9月5日
 @author: iw12082
 '''
 import scrapy
-from testScrapy.items import AuthorItem, QuoteItem, TagItem
+from testScrapy.items import AuthorItem, QuoteItem
 from OpenSSL._util import text
 
 class QuotesSpider(scrapy.Spider):
     name = "quotes"
     
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            'testScrapy.pipelines.QuotePipeline': 300,
+            },
+        'CLOSESPIDER_ITEMCOUNT': 10, #抓取10个条目后停止spider
+        'JOBDIR': '../crawls/'+__name__+'-1', #spider 状态保存位置
+        }
     def start_requests(self):
         urls = [
             'http://quotes.toscrape.com',
         ]
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
-
+      
     def parse(self, response):
         # follow links to author page
 #         for author_link in response.css("small.author + a::attr(href)"):
@@ -27,24 +34,17 @@ class QuotesSpider(scrapy.Spider):
             tags = quote.css("div.tags a.tag::text").extract()
             text = quote.css("span.text::text").extract_first()
             author = quote.css("small.author::text").extract_first()
-            tag_id = []
-            for tag in tags:
-                tag_item = TagItem()
-                tag_item['name'] = tag
-                yield tag_item
-                tag_id.append(tag_item['id'])
             
             # follow links to auhtor page
-            author_link = quote.css("small.author + a::attr(href)")[0]
-            yield response.follow(author_link, self.author_parse)
+            #author_link = quote.css("small.author + a::attr(href)")[0]
+            #yield response.follow(author_link, self.author_parse)
             
             quote_item = QuoteItem()
             quote_item['text'] = repr(text)
             quote_item['author'] = author
-            quote_item['tags'] = repr('-'.join(map(str, tag_id)))
+#            quote_item['tags'] = repr('-'.join(map(str, tag_id)))
+            quote_item['tags'] = repr('|'.join(tags))
             yield quote_item
-            
-        
         
         # follow pagination links
         for link in response.css("li.next a::attr(href)"):
@@ -71,4 +71,5 @@ class QuotesSpider(scrapy.Spider):
         author_item['description'] = response.css("div.author-description::text").extract_first()
         
         yield author_item
-        
+
+    
