@@ -72,8 +72,8 @@ class ZhihuSpider(scrapy.Spider):
 #             "utm_source": ""
 #         }
         post_data  = {
-             "username": "15208393732",  # 输入知乎用户名
-             "password": "R393732k",  # 输入知乎密码
+             "username": "",  # 输入知乎用户名
+             "password": "",  # 输入知乎密码
              "captcha": self.get_captcha(need_cap),  # 获取图片验证码
             }
         
